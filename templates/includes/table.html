@@ -20,6 +20,7 @@
             });
             return selected;
         }
+
         $("#btnName{{id}}").on("click", function () {
             var oAll = getSelected();
             var ids_names = [];
@@ -33,7 +34,27 @@
                 $.ajax({
                     type: "POST",
                     url: "/my/{{db_name}}/delete_batch_name_array",
-                    data: { 'data': JSON.stringify(ids_names) }
+                    data: { 'data': JSON.stringify(ids_names) },
+                    success: function () {
+                        var oAll = getSelected();
+                        var ids_names = [];
+                        for (var i = 0; i < oAll.length; i++) {
+                            var row = oAll[i];
+                            var id_name = row[5];
+                            ids_names.push(id_name);
+                        }
+                        var unique_id_names = ids_names.filter(onlyUnique)
+                        console.log(unique_id_names);
+                        for (var i = 0; i < unique_id_names.length; i++) {
+                            var indexes = oTable
+                                .rows()
+                                .indexes()
+                                .filter(function (value, index) {
+                                    return unique_id_names[i] === oTable.row(value).data()[5];
+                                });
+                            oTable.rows(indexes).remove().draw();
+                        }
+                    }
                 });
             }
         });
@@ -51,41 +72,21 @@
                 $.ajax({
                     type: "POST",
                     url: "/my/{{db_name}}/delete_batch_id_array",
-                    data: { 'data': JSON.stringify(ids_names) }
+                    data: { 'data': JSON.stringify(ids_names) },
+                    success: function () {
+                        oTable
+                            .rows('.selected')
+                            .remove()
+                            .draw();
+                    }
                 });
             }
         });
 
-        $("#btnID{{id}}").on("click", function () {
-            oTable
-                .rows('.selected')
-                .remove()
-                .draw();
-        });
         function onlyUnique(value, index, self) {
             return self.indexOf(value) === index;
         }
 
-        $("#btnName{{id}}").on("click", function () {
-            var oAll = getSelected();
-            var ids_names = [];
-            for (var i = 0; i < oAll.length; i++) {
-                var row = oAll[i];
-                var id_name = row[5];
-                ids_names.push(id_name);
-            }
-            var unique_id_names = ids_names.filter(onlyUnique)
-            console.log(unique_id_names);
-            for (var i = 0; i < unique_id_names.length; i++) {
-                var indexes = oTable
-                    .rows()
-                    .indexes()
-                    .filter(function (value, index) {
-                        return unique_id_names[i] === oTable.row(value).data()[5];
-                    });
-                oTable.rows(indexes).remove().draw();
-            }
-        });
 
 
 
