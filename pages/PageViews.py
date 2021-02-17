@@ -6,8 +6,8 @@ from flask import Blueprint, flash, render_template, request
 from OIDC_Module import oidc
 from db_actions import PostgersqlDBManagement, SQLiteDBManagement
 
-pages = Blueprint('pages', __name__, static_folder='static', static_url_path="/Pages/static",
-                  template_folder='templates', )
+pages = Blueprint('pages', __name__, static_folder='/static', static_url_path="/pages-static",
+                  template_folder='templates')
 
 
 @pages.route('/my/Page1')

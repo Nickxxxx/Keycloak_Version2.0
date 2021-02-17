@@ -8,7 +8,7 @@ from flask_oidc import OpenIDConnect
 
 def init_app():
     """Create Flask application."""
-    app = Flask(__name__, static_folder='/static')
+    app = Flask(__name__, static_folder='static', static_url_path='')
     app.config.update({
                           'SECRET_KEY': 'u\x91\xcf\xfa\x0c\xb9\x95\xe3t\xba2K\x7f\xfd\xca\xa3\x9f\x90\x88\xb8\xee\xa4\xd6\xe4',
                           'OIDC_CLIENT_SECRETS': '.\client_secrets.json',
@@ -21,10 +21,10 @@ def init_app():
                           })
 
     with app.app_context():
-        from Auth.LoginView import auth
+        from auth.LoginView import auth
         from Dashboard.DashboardView import dash
-        from Home.HomeView import home
-        from Pages.PageViews import pages
+        from home.HomeView import home
+        from pages.PageViews import pages
         # Register Blueprints
         app.register_blueprint(home)
         app.register_blueprint(auth)
