@@ -1,10 +1,9 @@
 import json
 from base64 import b64decode
 from functools import wraps
-
 from flask import redirect, url_for, flash
 
-from OIDC_Module import oidc
+from Oidc_Decorators import oidc
 
 
 def require_keycloak_role(roles):
@@ -27,11 +26,6 @@ def require_keycloak_role(roles):
             pre, tkn, post = raw_access_token.split('.')
             access_token = b64decode(tkn + '=' * (-len(tkn) % 4))
             access_token = json.loads(access_token.decode('utf-8'))
-            print(raw_access_token)
-            print("------")
-            print(access_token)
-            print("------")
-            print(oidc.validate_token(raw_access_token))
 
             user_id = oidc.user_getfield('sub')
             access_token_id = access_token['sub']
@@ -70,7 +64,7 @@ def validate_accesstoken(f):
             return f(*args, **kwargs)
         else:
             flash('Not a valid token', 'danger')
-            return redirect(url_for('login'))
+            return redirect(url_for('dash.dashboard'))
     return wrap
 
 

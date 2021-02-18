@@ -1,55 +1,64 @@
 import ast
 import json
-
-from flask import Blueprint, flash, render_template, request
-
-from OIDC_Module import oidc
 from db_actions import PostgersqlDBManagement, SQLiteDBManagement
+from Oidc_Decorators.Decorators import require_keycloak_role
+from flask import Blueprint, flash, render_template, request
+from flask import Blueprint, render_template, redirect, url_for, flash, session
 
-pages = Blueprint('pages', __name__, static_folder='/static', static_url_path="/pages-static",
-                  template_folder='templates')
+from Oidc_Decorators import oidc
+
+dash = Blueprint('dash', __name__,  __name__, static_folder='/static', static_url_path="/pages-static",
+                 template_folder='templates')
 
 
-@pages.route('/my/Page1')
+@dash.route('/my/', methods=['POST', 'GET'])
 @oidc.require_login
+def dashboard():
+    if oidc.user_loggedin:
+        info = oidc.user_getinfo('sub')
+        user_id = info.get('sub')
+
+        if user_id in oidc.credentials_store:
+
+            flash('Welcome %s' % oidc.user_getfield(
+                'preferred_username'), 'success')
+            return render_template('main.html')
+
+        else:
+            session.clear()
+            oidc.logout()
+            return redirect('http://localhost:8080/auth/realms/Application1/protocol/openid-connect/logout?redirect_uri=http://localhost:5000/')
+
+    return redirect(url_for('start.Startscreen'))
+
+
+@dash.route('/my/Page1')
+@oidc.require_login
+@require_keycloak_role(["User", "Admin"])
 def page_1():
     flash('Authorized!', 'success')
     return render_template('Page1.html')
 
 
-# user and Guest
-@pages.route('/my/Page2')
+@dash.route('/my/Page2')
 @oidc.require_login
+@require_keycloak_role(["User", "Admin", "Guest"])
 def page_2():
     flash('Authorized!', 'success')
     return render_template('Page2.html')
 
 
-# Page3 user and admin
-@pages.route('/my/Page3')
+@dash.route('/my/KeycloakAdminPage')
 @oidc.require_login
-def page_3():
-    flash('Authorized!', 'success')
-    return render_template('Page3.html')
-
-
-# Page 4 only admin access where you can see the admin panel
-@pages.route('/my/Page4')
-@oidc.require_login
-def page_4():
-    flash('Authorized!', 'success')
-    return render_template('Page4.html')
-
-
-@pages.route('/my/Admin')
-@oidc.require_login
+@require_keycloak_role(["Admin"])
 def page_admin():
     flash('Authorized!', 'success')
     return render_template('PageAdmin.html')
 
 
-@pages.route('/my/Postgres', methods=["GET", "POST"])
+@dash.route('/my/Postgres', methods=["GET", "POST"])
 @oidc.require_login
+@require_keycloak_role(["User", "Admin"])
 def page_postgres():
     table_name = 'batch'
     with open("parameters.json") as file:
@@ -61,8 +70,9 @@ def page_postgres():
                            table=database.get_table(table_name))
 
 
-@pages.route("/my/Postgres/delete_batch_id_array", methods=["POST"])
+@dash.route("/my/Postgres/delete_batch_id_array", methods=["POST"])
 @oidc.require_login
+@require_keycloak_role(["User", "Admin"])
 def delete_from_table_by_id_postgres():
     table_name = 'batch'
     with open("parameters.json") as file:
@@ -74,8 +84,9 @@ def delete_from_table_by_id_postgres():
     return "True"
 
 
-@pages.route("/my/Postgres/delete_batch_name_array", methods=["POST"])
+@dash.route("/my/Postgres/delete_batch_name_array", methods=["POST"])
 @oidc.require_login
+@require_keycloak_role(["User", "Admin"])
 def delete_from_table_by_name_postgres():
     table_name = 'batch'
     with open("parameters.json") as file:
@@ -87,8 +98,9 @@ def delete_from_table_by_name_postgres():
     return "True"
 
 
-@pages.route('/my/SQLite', methods=["GET", "POST"])
+@dash.route('/my/SQLite', methods=["GET", "POST"])
 @oidc.require_login
+@require_keycloak_role(["User", "Admin"])
 def page_sqlite():
     table_name = 'batch'
     with open("parameters.json") as file:
@@ -99,8 +111,9 @@ def page_sqlite():
                            table=database.get_table(table_name))
 
 
-@pages.route("/my/SQLite/delete_batch_id_array", methods=["POST"])
+@dash.route("/my/SQLite/delete_batch_id_array", methods=["POST"])
 @oidc.require_login
+@require_keycloak_role(["User", "Admin"])
 def delete_from_table_by_id_sqlite():
     table_name = 'batch'
     with open("parameters.json") as file:
@@ -111,8 +124,9 @@ def delete_from_table_by_id_sqlite():
     return "True"
 
 
-@pages.route("/my/SQLite/delete_batch_name_array", methods=["POST"])
+@dash.route("/my/SQLite/delete_batch_name_array", methods=["POST"])
 @oidc.require_login
+@require_keycloak_role(["User", "Admin"])
 def delete_from_table_by_name_sqlite():
     table_name = 'batch'
     with open("parameters.json") as file:
