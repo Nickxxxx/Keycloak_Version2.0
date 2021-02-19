@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session
 
 from Oidc_Decorators import oidc
 
-dash = Blueprint('dash', __name__,  __name__, static_folder='/static', static_url_path="/pages-static",
+dash = Blueprint('dash', __name__,  static_folder='/static', static_url_path="/pages-static",
                  template_folder='templates')
 
 
@@ -15,7 +15,7 @@ dash = Blueprint('dash', __name__,  __name__, static_folder='/static', static_ur
 @oidc.require_login
 def dashboard():
     if oidc.user_loggedin:
-        info = oidc.user_getinfo('sub')
+        info = oidc.user_getinfo(['sub'])
         user_id = info.get('sub')
 
         if user_id in oidc.credentials_store:
