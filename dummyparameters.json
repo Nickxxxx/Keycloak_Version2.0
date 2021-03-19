@@ -1,0 +1,6 @@
+{
+    "grant_type" : "password",
+    "username": "tester1",
+    "password": "12345"
+}
+

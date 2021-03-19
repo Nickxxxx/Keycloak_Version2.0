@@ -3,9 +3,6 @@ from flask.globals import current_app
 from flask_oidc import OpenIDConnect
 
 
-# Import parts of our application
-
-
 def init_app():
     """Create Flask application."""
     app = Flask(__name__, static_folder='static', static_url_path='')
@@ -15,12 +12,14 @@ def init_app():
         from Startscreen.StartView import start
         from auth.LogoutView import auth
         from Home.DashboardView import dash
+        from LoggingHandler.LogView import log
        
         
         # Register Blueprints
         app.register_blueprint(start)
         app.register_blueprint(auth)
         app.register_blueprint(dash)
+        app.register_blueprint(log)
 
         return app
 

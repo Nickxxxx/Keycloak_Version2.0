@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, url_for
+from flask import Blueprint, flash, redirect, url_for, render_template
 
 from Oidc_Decorators import oidc
 
@@ -10,4 +10,4 @@ def Startscreen():
         flash('Welcome %s' % oidc.user_getfield('username'))
         return redirect(url_for('dash.dashboard'))
     else:
-        return 'Welcome anonymous, <a href="/my">Log in</a>'
+        return render_template('startscreen.html')#'Welcome anonymous, <a href="/my">Log in</a>'

@@ -2,6 +2,7 @@ import json
 from base64 import b64decode
 from functools import wraps
 from flask import redirect, url_for, flash
+from flask.helpers import make_response
 
 from Oidc_Decorators import oidc
 
@@ -36,55 +37,9 @@ def require_keycloak_role(roles):
                         return view_func(*args, **kwargs)
                 else:
                     flash('Unauthorized!', 'danger')
-                    return redirect(url_for('dash.dashboard'))
+                    return redirect(url_for('dash.dashboard')) 
             else:
                 flash('Invalid Token!', 'danger')
                 return redirect(url_for('dash.dashboard'))
         return decorated
     return wrapper
-
-
-def validate_accesstoken(f):
-    """
-        This function can be used to validate tokens.
-        Note that this only works if a token introspection url is configured,
-        as that URL will be queried for the validity and scopes of a token. 
-        The decorator function do not need any parameter since it will get them by itself
-
-        :returns: True if the token was valid and contained the required
-            scopes. An ErrStr (subclass of string for which bool() is False) if
-            an error occured.
-        :rtype: Boolean or String
-    """
-    @oidc.accept_token(require_token=True)
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        access_token = oidc.get_access_token()
-        if oidc.validate_token(access_token):
-            return f(*args, **kwargs)
-        else:
-            flash('Not a valid token', 'danger')
-            return redirect(url_for('dash.dashboard'))
-    return wrap
-
-
-'''
-def require_login(f):
-    """
-        This function can be used to validate tokens.
-        Note that this only works if a token introspection url is configured,
-        as that URL will be queried for the validity and scopes of a token. 
-        The decorator function do not need any parameter since it will get them by itself
-
-        :returns: True if the token was valid and contained the required
-            scopes. An ErrStr (subclass of string for which bool() is False) if
-            an error occured.
-        :rtype: Boolean or String
-    """
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if g.oidc_id_token is None:
-            return oidc.redirect_to_auth_server(request.url)
-        return f(*args, **kwargs)
-    return decorated
-'''
